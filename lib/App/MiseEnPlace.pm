@@ -135,6 +135,12 @@ sub _create_link {
 sub _load_configs {
   my( $self ) = shift;
 
+  unless ( -e $self->config_file ) {
+    say "Whoops, it looks like you don't have a ~/.mise file yet.";
+    say "Please review the documentation, create one, and try again.";
+    exit;
+  }
+
   my $base_config = _load_config_file( $self->config_file );
 
   my @links = map { _parse_linkpair( $_ , $self->homedir) }
