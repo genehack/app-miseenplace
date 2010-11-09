@@ -31,7 +31,7 @@ has 'bindir' => (
 has 'config_file' => (
   is       => 'rw' ,
   isa      => 'Str' ,
-  default  => '~/.mise' ,
+  default  => "$ENV{HOME}/.mise" ,
   lazy     => 1 ,
   required => 1 ,
 );
