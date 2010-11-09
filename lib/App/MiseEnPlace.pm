@@ -178,10 +178,10 @@ sub _load_config_file {
   my $config;
 
   try { $config = LoadFile( glob($file) ) }
-    catch {
-      say "Failed to parse config file $file:\n\t$_";
-      exit;
-    };
+  catch {
+    say "Failed to parse config file $file:\n\t$_";
+    exit;
+  };
 
   return $config;
 
