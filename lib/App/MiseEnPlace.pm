@@ -222,6 +222,9 @@ sub _parse_linkpair {
   confess "BAD LINKPAIR" unless
     my( $src , $target ) = ( %$linkpair );
 
+  # this lets 'DIR' turn into enclosing directory
+  $src = '' if $src eq 'DIR';
+
   $src    = _prepend_dir( $src , $dir );
   $target = _prepend_dir( $target , $dir ) unless $target eq 'BIN';
 
