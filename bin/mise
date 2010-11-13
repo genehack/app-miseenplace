@@ -97,6 +97,15 @@ source will be the directory containing the .mise file in question.
 
 =over 4
 
+=item C<--config/-C FILE>
+
+Use a different config file
+
+=item C<--remove-bin-links/-R>
+
+Makes C<mise> remove any sylinks from the C<bindir> after doing directory
+creation and before doing symlink creation.
+
 =item C<--verbose/-v>
 
 Makes C<mise> be very noisy about exactly what is going on.

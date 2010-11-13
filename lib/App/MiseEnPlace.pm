@@ -12,6 +12,7 @@ use warnings;
 use 5.010;
 
 use base 'App::Cmd::Simple';
+use autodie;
 use Carp;
 use File::Basename;
 use File::Path 2.08  qw/ make_path /;
@@ -64,6 +65,7 @@ has 'verbose' => (
 sub opt_spec {
   return (
     [ 'config|C=s' => 'config file location (default = ~/.mise)' ] ,
+    [ 'remove-bin-links|R' => 'remove all links from ~/bin at beginning of run' ] ,
     [ 'verbose|v' => 'be verbose' ] ,
     [ 'version|V' => 'show version' ] ,
   );
@@ -98,6 +100,19 @@ sub execute {
   $self->_load_configs;
 
   $self->_create_dir( $_ )  for ( @{ $self->directories } );
+
+  if ( $opt->{remove_bin_links} and -e -d $self->bindir ) {
+    my $bin = $self->bindir;
+    opendir( my $dh , $bin );
+    while ( readdir $dh ) {
+      next unless -l "$bin/$_";
+      unlink "$bin/$_";
+      say colored('UNLINK' , 'bright_red' ) ,
+        " ~/bin/$_" if $opt->{verbose};
+    }
+    closedir( $dh );
+  }
+
   $self->_create_link( $_ ) for ( @{ $self->links } );
 
 }
