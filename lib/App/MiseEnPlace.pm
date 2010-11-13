@@ -17,6 +17,7 @@ use File::Basename;
 use File::Path 2.08  qw/ make_path /;
 use File::Path::Expand;
 use Mouse;
+use Term::ANSIColor;
 use Try::Tiny;
 use YAML        qw/ LoadFile /;
 
@@ -86,6 +87,14 @@ sub validate_args {
 sub execute {
   my( $self , $opt , $args ) = @_;
 
+  # set up colored output if we page thru less
+  # also exit pager immediately if <1 page of output
+  $ENV{LESS} = 'RF';
+
+  # don't catch any errors here; if this fails we just output stuff like
+  # normal and nobody is the wiser.
+  eval 'use IO::Page';
+
   $self->_load_configs;
 
   $self->_create_dir( $_ )  for ( @{ $self->directories } );
@@ -96,18 +105,25 @@ sub execute {
 sub _create_dir {
   my( $self , $dir ) = @_;
 
+  my $msg;
+
   given( $dir ) {
     when( -e -d ) {
-      say "'$dir' exists" if $self->verbose;
+      $msg = colored('exists ','green') if $self->verbose;
     }
-    when( -e ) {
-      return if -l $dir;
-      say "ERROR: Creation of '$dir' blocked by non-dirctory";
+    when( -e and ! -l ) {
+      $msg = colored('ERROR: blocked by non-dirctory','bold white on_red');
     }
     default {
       make_path $dir;
-      say "Created '$dir'" if $self->verbose;
+      $msg = colored('created','bold black on_green');
     }
+  }
+
+  my $home = $self->homedir;
+  if ( $msg ) {
+    $dir =~ s/^$home/~/;
+    say "[ DIR] $msg $dir";
   }
 }
 
@@ -116,19 +132,34 @@ sub _create_link {
 
   my( $src , $target ) = @$linkpair;
 
-  if ( -e -l $target ) {
-    ### FIXME should make sure that target points to right src
-    say "Link from '$src' to '$target' exists" if $self->verbose;
+  my $msg;
+
+  if ( ! -e $src ) {
+    $msg = colored( 'ERROR:  src does not exist' , 'bold white on_red' )
   }
-  elsif ( ! -e $src ) {
-    say "Not linking '$src': it does not exist" if $self->verbose;
+  elsif( -e -l $target ) {
+    if ( readlink $target eq $src ) {
+      $msg = colored('exists ','green') if $self->verbose;
+    }
+    else {
+      unlink $target;
+      symlink $src , $target;
+      $msg = colored( 'fixed' , 'bold black on_bright_yellow' ) . '  ';
+    }
   }
   elsif ( -e $target ) {
-    say "ERROR: Creation of link from '$src' to '$target' blocked by existing file";
+    $msg = colored( 'ERROR:  blocked by existing file' , 'bold white on_red' );
   }
   else {
     symlink $src , $target;
-    say "Created link from $src to $target" if $self->verbose;
+    $msg = colored( 'created' , 'bold black on_green' );
+  }
+  my $home = $self->homedir;
+
+  if ( $msg ) {
+    $src    =~ s/^$home/~/;
+    $target =~ s/^$home/~/;
+    say "[LINK] $msg $src -> $target";
   }
 }
 
