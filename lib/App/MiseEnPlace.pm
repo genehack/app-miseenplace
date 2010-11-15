@@ -39,8 +39,12 @@ has 'config_file' => (
 );
 
 has 'directories' => (
-  is  => 'rw' ,
-  isa => 'ArrayRef[Str]' ,
+  is      => 'rw' ,
+  isa     => 'ArrayRef[Str]' ,
+  traits  => [ 'Array' ] ,
+  handles => {
+    all_directories => 'elements' ,
+  } ,
 );
 
 has 'homedir' => (
@@ -52,8 +56,12 @@ has 'homedir' => (
 );
 
 has 'links' => (
-  is  => 'rw' ,
-  isa => 'ArrayRef[ArrayRef[Str]]' ,
+  is      => 'rw' ,
+  isa     => 'ArrayRef[ArrayRef[Str]]' ,
+  traits  => [ 'Array' ] ,
+  handles => {
+    all_links => 'elements' ,
+  } ,
 );
 
 has 'verbose' => (
@@ -99,7 +107,7 @@ sub execute {
 
   $self->_load_configs;
 
-  $self->_create_dir( $_ )  for ( @{ $self->directories } );
+  $self->_create_dir( $_ ) for $self->all_directories;
 
   if ( $opt->{remove_bin_links} and -e -d $self->bindir ) {
     my $bin = $self->bindir;
@@ -113,7 +121,7 @@ sub execute {
     closedir( $dh );
   }
 
-  $self->_create_link( $_ ) for ( @{ $self->links } );
+  $self->_create_link( $_ ) for $self->all_links;
 
 }
 
