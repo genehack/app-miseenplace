@@ -23,11 +23,11 @@ use Try::Tiny;
 use YAML        qw/ LoadFile /;
 
 has 'bindir' => (
-  is => 'rw' ,
-  isa => 'Str' ,
+  is       => 'rw' ,
+  isa      => 'Str' ,
   required => 1 ,
-  default => sub { expand_filename '~/bin/' } ,
-  lazy => 1 ,
+  default  => sub { expand_filename '~/bin/' } ,
+  lazy     => 1 ,
 );
 
 has 'config_file' => (
