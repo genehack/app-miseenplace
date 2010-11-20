@@ -167,7 +167,7 @@ sub _create_link {
     else {
       unlink $target;
       symlink $src , $target;
-      $msg = colored( 'fixed' , 'bold black on_bright_yellow' ) . '  ';
+      $msg = colored( 'fixed' , 'bold black on_yellow' ) . '  ';
     }
   }
   elsif ( -e $target ) {
