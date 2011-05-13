@@ -1,0 +1,6 @@
+Changes file for {{$dist->name}}
+
+{{$NEXT}}
+
+OLDER:
+  * Hadn't been maintaining Changes file. Bad coder, no cookie.
