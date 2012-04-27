@@ -2,6 +2,11 @@
 # PODNAME: mise
 # ABSTRACT: manage directory and symlink creation, globally and per-project
 
+=head1 DESCRIPTION
+
+C<mise> is a simple script that allows you to manage directory and symlink
+creation based on a global config as well as per-project configs.
+
 =head1 SYNOPSIS
 
     # in ~/.mise:
@@ -43,11 +48,6 @@
     Link from '/home/user/var/tmp' to '/home/user/tmp' exists
     Created link from /home/user/proj/my-project/bin/script to /home/user/bin/script
     Created link from /home/user/proj/my-project to /home/user/my-project
-
-=head1 DESCRIPTION
-
-C<mise> is a simple script that allows you to manage directory and symlink
-creation based on a global config as well as per-project configs.
 
 =head1 OPTIONS
 
