@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>App-MiseEnPlace by genehack</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>App-MiseEnPlace</h1>
+        <p>A place for everything and everything in its place</p>
+        <p class="view"><a href="https://github.com/genehack/app-miseenplace">View the Project on GitHub <small>genehack/app-miseenplace</small></a></p>
+        <ul>
+          <li><a href="https://github.com/genehack/app-miseenplace/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/genehack/app-miseenplace/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/genehack/app-miseenplace">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>DESCRIPTION</h1>
+
+<p><code>mise</code> is a simple script that allows you to manage directory and symlink
+creation based on a global config as well as per-project configs.</p>
+
+<h1>SYNOPSIS</h1>
+
+<pre><code># in ~/.mise:
+---
+manage:
+  - proj/*
+  - etc
+create:
+  directories:
+    - bin
+    - doc
+    - etc
+    - lib
+    - proj
+    - src
+    - var/tmp
+  links:
+    - var/tmp: tmp
+
+
+
+# in ~/proj/my-project/.mise
+---
+create:
+  links:
+    bin/script: BIN
+    DIR: ~/my-project
+
+# then run
+mise -v
+
+# output
+'/home/user/bin' exists
+'/home/user/doc' exists
+'/home/user/etc' exists
+'/home/user/lib' exists
+'/home/user/proj' exists
+Created '/home/user/src'
+'/home/user/var/tmp' exists
+Link from '/home/user/var/tmp' to '/home/user/tmp' exists
+Created link from /home/user/proj/my-project/bin/script to /home/user/bin/script
+Created link from /home/user/proj/my-project to /home/user/my-project
+</code></pre>
+
+<h1>OPTIONS</h1>
+
+<p>The config file in the SYNOPSIS illustrates most of the available options.</p>
+
+<ul>
+<li>bindir</li>
+</ul><p>The directory to be used for the expansion of the keyword 'BIN' when creating
+symlinks. (See below.) Defaults to <code>$ENV{HOME}/bin</code></p>
+
+<ul>
+<li>manage</li>
+</ul><p>This is a list of directories in which to search for per-project config
+files. Directories that don't start with a '/' are assumed to be relative to
+$ENV{HOME} (i.e., 'foo' will be expanded to "$ENV{HOME}/foo"). Each line will
+be globbed, so standard shell wildcards can be used.</p>
+
+<p>This option is only valid in the "top-level" <code>~/.mise</code> config file; it will
+have to effect if placed in a per-project config.</p>
+
+<ul>
+<li>create/directories</li>
+</ul><p>This is a list of directories to create. Directories that don't start with a
+'/' are assumed to be relative to the directory containing the .mise
+file. (I.e., <code>foo</code> in a <code>.mise</code> file located in <code>$ENV{HOME}/my/proj/</code> will
+be expanded to <code>$ENV{HOME}/my/proj/foo</code>)</p>
+
+<ul>
+<li>create/links</li>
+</ul><p>This is a list of symlinks to create, expressed as a series of source =&gt;
+target pairs. Both the source and target will be expanded relative to the
+directory containing the <code>.mise</code> file, as explained above for
+create/directories. Additionally, if the target ends in a '/', the basename of
+the source value will be appended (in much the same way the <code>ln -s</code> works.)</p>
+
+<p>Finally, there are a few keywords that can be used when creating links. If the
+target consists solely of the keyword 'BIN', the link will be created in the
+directory in the 'bindir' configuration variable, again using the basename of
+the source. If the source consists solely of the keyword 'DIR', the link
+source will be the directory containing the .mise file in question.</p>
+
+<h1>FLAGS</h1>
+
+<ul>
+<li><code>--config/-C FILE</code></li>
+</ul><p>Use a different config file</p>
+
+<ul>
+<li><code>--remove-bin-links/-R</code></li>
+</ul><p>Makes <code>mise</code> remove any sylinks from the <code>bindir</code> after doing directory
+creation and before doing symlink creation.</p>
+
+<ul>
+<li><code>--verbose/-v</code></li>
+</ul><p>Makes <code>mise</code> be very noisy about exactly what is going on.</p>
+
+<ul>
+<li><code>--version/-V</code></li>
+</ul><p>Displays the version number and exits</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/genehack">genehack</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
