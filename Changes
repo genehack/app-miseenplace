@@ -2,5 +2,16 @@ Changes file for {{$dist->name}}
 
 {{$NEXT}}
 
+ * Fix README.mkdn / dist.ini stuff 
+ * Fix shebang; silence given/when warnings
+ * Tweak POD
+ * README file
+ * Minor tweaks & cleanups.
+ * Add Changes file.
+ * the IO::Page thing work on 256color terms
+ * remove use of on_bright_yellow
+ * whitespace
+ * use Array traits for array-based attrs
+
 OLDER:
   * Hadn't been maintaining Changes file. Bad coder, no cookie.
