@@ -1,4 +1,4 @@
-#! /opt/perl/bin/perl
+#! /usr/bin/env perl
 # PODNAME: mise
 # ABSTRACT: manage directory and symlink creation, globally and per-project
 

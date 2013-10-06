@@ -129,6 +129,7 @@ sub _create_dir {
 
   my $msg;
 
+  no warnings 'experimental::smartmatch';
   given( $dir ) {
     when( -e -d ) {
       $msg = colored('exists ','green') if $self->verbose;
