@@ -1,4 +1,5 @@
 package App::MiseEnPlace;
+
 # ABSTRACT: A place for everything and everything in its place
 
 =head1 SYNOPSIS
@@ -14,56 +15,54 @@ use 5.010;
 use base 'App::Cmd::Simple';
 use autodie;
 use Carp;
-use File::Basename;
-use File::Path::Expand;
-use Mouse;
+use File::HomeDir;
 use Path::Tiny;
 use Term::ANSIColor;
 use Try::Tiny;
-use YAML                qw/ LoadFile /;
+use Types::Standard -types;
+use YAML qw/ LoadFile /;
+
+use Moo;
+use MooX::HandlesVia;
 
 has bindir => (
-  is       => 'rw' ,
-  isa      => 'Str' ,
-  lazy     => 1 ,
-  default  => sub { expand_filename '~/bin/' } ,
+  is      => 'rw' ,
+  isa     => Str ,
+  lazy    => 1 ,
+  default => sub { path( File::HomeDir->my_home , 'bin' )->stringify } ,
 );
 
 has config_file => (
-  is       => 'rw' ,
-  isa      => 'Str' ,
-  lazy     => 1 ,
-  default  => "$ENV{HOME}/.mise" ,
+  is      => 'rw' ,
+  isa     => Str ,
+  lazy    => 1 ,
+  default => sub { path( File::HomeDir->my_home() , '.mise' )->stringify() } ,
 );
 
 has 'directories' => (
-  is      => 'rw' ,
-  isa     => 'ArrayRef[Str]' ,
-  traits  => [ 'Array' ] ,
-  handles => {
-    all_directories => 'elements' ,
-  } ,
+  is          => 'rw' ,
+  isa         => ArrayRef[Str] ,
+  handles_via => 'Array' ,
+  handles     => { all_directories => 'elements' } ,
 );
 
 has 'homedir' => (
-  is       => 'rw' ,
-  isa      => 'Str' ,
-  lazy     => 1 ,
-  default  => $ENV{HOME} ,
+  is      => 'rw' ,
+  isa     => Str ,
+  lazy    => 1 ,
+  default => sub { path( File::HomeDir->my_home )->stringify() } ,
 );
 
 has 'links' => (
-  is      => 'rw' ,
-  isa     => 'ArrayRef[ArrayRef[Str]]' ,
-  traits  => [ 'Array' ] ,
-  handles => {
-    all_links => 'elements' ,
-  } ,
+  is          => 'rw' ,
+  isa         => ArrayRef[ArrayRef[Str]] ,
+  handles_via => 'Array' ,
+  handles     => { all_links => 'elements' } ,
 );
 
 has 'verbose' => (
   is      => 'rw' ,
-  isa     => 'Bool' ,
+  isa     => Bool ,
   default => 0 ,
 );
 
@@ -87,7 +86,7 @@ sub validate_args {
   }
 
   $self->config_file( $opt->{config} ) if $opt->{config};
-  $self->verbose( $opt->{verbose} ) if $opt->{verbose};
+  $self->verbose( $opt->{verbose} )    if $opt->{verbose};
 }
 
 sub execute {
@@ -101,27 +100,14 @@ sub execute {
   # normal and nobody is the wiser.
   eval 'use IO::Page';
 
-  $self->_load_configs;
+  $self->_load_configs();
 
-  if ( $opt->{remove_bin_links} and -e -d $self->bindir ) {
-    my $bin = $self->bindir;
+  $self->_remove_bin_links($opt)
+    if $opt->{remove_bin_links} and -e -d $self->bindir();
 
-    opendir( my $dh , $bin );
-    while ( readdir $dh ) {
-      next unless -l "$bin/$_";
+  $self->_create_dir( $_ ) for $self->all_directories();
 
-      unlink "$bin/$_";
-
-      say colored('UNLINK' , 'bright_red' ) , " ~/bin/$_"
-        if $opt->{verbose};
-    }
-    closedir( $dh );
-  }
-
-  $self->_create_dir( $_ ) for $self->all_directories;
-
-  $self->_create_link( $_ ) for $self->all_links;
-
+  $self->_create_link( $_ ) for $self->all_links();
 }
 
 sub _create_dir {
@@ -130,17 +116,17 @@ sub _create_dir {
   my $msg;
 
   if( -e -d $dir ) {
-    $msg = colored('exists ','green') if $self->verbose;
+    $msg = colored('exists ','green') if $self->verbose();
   }
   elsif( -e $dir and ! -l $dir ) {
     $msg = colored('ERROR: blocked by non-dirctory','bold white on_red');
   }
   else {
-    path( $dir )->mkpath;
+    path( $dir )->mkpath();
     $msg = colored('created','bold black on_green');
   }
 
-  my $home = $self->homedir;
+  my $home = $self->homedir();
   if ( $msg ) {
     $dir =~ s/^$home/~/;
     say "[ DIR] $msg $dir";
@@ -174,8 +160,8 @@ sub _create_link {
     symlink $src , $target;
     $msg = colored( 'created' , 'bold black on_green' );
   }
-  my $home = $self->homedir;
 
+  my $home = $self->homedir();
   if ( $msg ) {
     $src    =~ s/^$home/~/;
     $target =~ s/^$home/~/;
@@ -186,25 +172,23 @@ sub _create_link {
 sub _load_configs {
   my( $self ) = shift;
 
-  unless ( -e $self->config_file ) {
-    say "Whoops, it looks like you don't have a ~/.mise file yet.";
+  unless ( -e $self->config_file() ) {
+    say "Whoops, it looks like you don't have a " . $self->config_file() . " file yet.";
     say "Please review the documentation, create one, and try again.";
     exit;
   }
 
-  my $base_config = _load_config_file( $self->config_file );
+  my $base_config = _load_config_file( $self->config_file() );
 
-  my @links = map { _parse_linkpair( $_ , $self->homedir) }
-    @{ $base_config->{create}{links} };
+  my @links = map { _parse_linkpair( $_ , $self->homedir() ) } @{ $base_config->{create}{links} };
 
-  my @dirs = map { _prepend_dir( $_ , $self->homedir) }
-    @{ $base_config->{create}{directories} };
+  my @dirs = map { _prepend_dir( $_ , $self->homedir() ) } @{ $base_config->{create}{directories} };
 
-  my @managed_dirs = map { glob _prepend_dir( $_ , $self->homedir ) }
-    @{ $base_config->{manage} };
+  my @managed_dirs = map { glob _prepend_dir( $_ , $self->homedir() ) } @{ $base_config->{manage} };
 
   for my $managed_dir ( @managed_dirs ) {
-    my $mise_file = "$managed_dir/.mise";
+    my $mise_file = path( $managed_dir , '.mise' )->stringify();
+
     if ( -e -r $mise_file ) {
       my $config = _load_config_file( $mise_file );
 
@@ -235,7 +219,6 @@ sub _load_config_file {
   };
 
   return $config;
-
 }
 
 sub _parse_create_links {
@@ -246,10 +229,11 @@ sub _parse_create_links {
   for my $link_pair ( @$link_array ) {
     my( $src , $target ) = ( %$link_pair );
 
-    my $src_base = basename( $src );
+    my $src_base = path( $src )->basename();
 
-    $target = $self->bindir if $target =~ m'BIN$';
-    $target = "$target$src_base" if $target =~ m|/$|;
+    $target = $self->bindir() if $target =~ m'BIN$';
+    $target = path($target, $src_base)->stringify()
+      if path($target)->is_dir() and ! path( $src )->is_dir();
 
     if (exists $link_targets{$target} ) {
       say "ERROR: Attempting to create multiple links to the same target:";
@@ -263,7 +247,6 @@ sub _parse_create_links {
   }
 
   return \@links;
-
 }
 
 sub _parse_linkpair {
@@ -286,9 +269,30 @@ sub _prepend_dir {
   confess "BAD ARGS" unless
     my( $base , $dir ) = @_;
 
-  return expand_filename $base if $base =~ m|^~|;
-  return "$dir/$base" unless $base =~ m|^/|;
-  return $base;
+  return path( $base )->stringify()        if $base =~ m|^~|;
+  return path( $dir )->stringify( )        unless $base;
+  return path( $dir , $base )->stringify() unless $base =~ m|^/|;
+  return path( $base )->stringify();
+}
+
+sub _remove_bin_links {
+  my( $self , $opt ) = @_;
+
+  my $bin = $self->bindir();
+
+  opendir( my $dh , $bin );
+  while ( readdir $dh ) {
+    my $path = path( $bin , $_ );
+
+    next unless -l $path;
+
+    $path->remove();
+
+    say colored('UNLINK' , 'bright_red' ) , " ~/bin/$_"
+      if $opt->{verbose};
+  }
+
+  closedir( $dh );
 }
 
 1;
