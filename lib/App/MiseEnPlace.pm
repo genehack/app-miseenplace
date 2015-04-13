@@ -15,9 +15,9 @@ use base 'App::Cmd::Simple';
 use autodie;
 use Carp;
 use File::Basename;
-use File::Path 2.08     qw/ make_path /;
 use File::Path::Expand;
 use Mouse;
+use Path::Tiny;
 use Term::ANSIColor;
 use Try::Tiny;
 use YAML                qw/ LoadFile /;
@@ -129,18 +129,15 @@ sub _create_dir {
 
   my $msg;
 
-  no warnings 'experimental::smartmatch';
-  given( $dir ) {
-    when( -e -d ) {
-      $msg = colored('exists ','green') if $self->verbose;
-    }
-    when( -e and ! -l ) {
-      $msg = colored('ERROR: blocked by non-dirctory','bold white on_red');
-    }
-    default {
-      make_path $dir;
-      $msg = colored('created','bold black on_green');
-    }
+  if( -e -d $dir ) {
+    $msg = colored('exists ','green') if $self->verbose;
+  }
+  elsif( -e $dir and ! -l $dir ) {
+    $msg = colored('ERROR: blocked by non-dirctory','bold white on_red');
+  }
+  else {
+    path( $dir )->mkpath;
+    $msg = colored('created','bold black on_green');
   }
 
   my $home = $self->homedir;

@@ -2,9 +2,12 @@ Changes file for {{$dist->name}}
 
 {{$NEXT}}
 
+ * Update copyright.
+ * Get rid of smartmatch bits.
+
 0.15      2013-10-06 10:44:23 America/New_York
 
- * Fix README.mkdn / dist.ini stuff 
+ * Fix README.mkdn / dist.ini stuff
  * Fix shebang; silence given/when warnings
  * Tweak POD
  * README file
