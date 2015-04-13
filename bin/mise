@@ -122,8 +122,6 @@ use strict;
 use warnings;
 use 5.010;
 
-use FindBin;
-use lib "$FindBin::RealBin/../lib";
 use App::MiseEnPlace;
 
 App::MiseEnPlace->run;
