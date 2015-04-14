@@ -2,6 +2,8 @@ Changes file for {{$dist->name}}
 
 {{$NEXT}}
 
+0.15_02   2015-04-13 21:06:26-07:00 America/Los_Angeles
+
  * Dep on specific Moo & MooX::HandlesVia versions
 
 0.15_01   2015-04-12 22:54:49-07:00 America/Los_Angeles
