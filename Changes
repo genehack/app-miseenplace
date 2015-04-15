@@ -2,6 +2,8 @@ Changes file for {{$dist->name}}
 
 {{$NEXT}}
 
+0.160     2015-04-14 21:21:17-07:00 America/Los_Angeles
+
  * No changes from last dev release.
 
 0.15_02   2015-04-13 21:06:26-07:00 America/Los_Angeles
